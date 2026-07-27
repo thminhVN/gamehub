@@ -31,11 +31,12 @@ game_hub-*.tar
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
-# Ignore digested/fingerprinted files produced by mix phx.digest (mix.exs's
-# "-<32 hex hash>.<ext>" naming, plus their .gz variants) anywhere under
-# priv/static — covers favicon, robots.txt, logo.svg, and the game's own
-# images/assets/*.png, all of which get a hashed sibling on `assets.deploy`.
+# Ignore digested/fingerprinted files produced by mix phx.digest anywhere
+# under priv/static: hashed siblings ("-<32 hex hash>.<ext>", e.g. favicon,
+# robots.txt, logo.svg, the game's images/assets/*.png) and the gzip
+# precompressed copies phx.digest also writes alongside the plain originals.
 /priv/static/**/*-????????????????????????????????.*
+/priv/static/**/*.gz
 
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
