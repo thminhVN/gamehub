@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Bé vui học">
+  <defs>
+    <linearGradient id="body" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#d59b5c" />
+      <stop offset="1" stop-color="#a86a30" />
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b97e3f" />
+      <stop offset="1" stop-color="#96591f" />
+    </linearGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffaf2" />
+      <stop offset="1" stop-color="#f7e6cd" />
+    </linearGradient>
+    <linearGradient id="cover" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff6b70" />
+      <stop offset="1" stop-color="#d93b40" />
+    </linearGradient>
+    <linearGradient id="beak" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffcf55" />
+      <stop offset="1" stop-color="#efa018" />
+    </linearGradient>
+    <radialGradient id="gloss" cx="0.34" cy="0.18" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.3" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- ear tufts -->
+  <path fill="#b97e3f" d="M30 26c6-9 16-9 21-1-8 1-15 4-21 10Z" />
+  <path fill="#b97e3f" d="M98 26c-6-9-16-9-21-1 8 1 15 4 21 10Z" />
+
+  <!-- body -->
+  <path fill="url(#body)" d="M64 10c26 0 45 19 45 46 0 31-20 52-45 52S19 87 19 56C19 29 38 10 64 10Z" />
+
+  <!-- feet -->
+  <path fill="url(#beak)" d="M44 102h12c2 0 4 2 4 4s-2 4-4 4H44c-2 0-4-2-4-4s2-4 4-4Z" />
+  <path fill="url(#beak)" d="M72 102h12c2 0 4 2 4 4s-2 4-4 4H72c-2 0-4-2-4-4s2-4 4-4Z" />
+
+  <!-- heart-shaped face -->
+  <path
+    fill="url(#face)"
+    d="M64 32c11-11 30-6 32 9 2 14-9 27-20 34-4 3-8 5-12 5s-8-2-12-5C41 68 30 55 32 41c2-15 21-20 32-9Z"
+  />
+
+  <!-- eyes -->
+  <circle cx="49" cy="50" r="12.5" fill="#ffffff" />
+  <circle cx="79" cy="50" r="12.5" fill="#ffffff" />
+  <circle cx="50.5" cy="51" r="7.6" fill="#4a3b32" />
+  <circle cx="77.5" cy="51" r="7.6" fill="#4a3b32" />
+  <circle cx="47.8" cy="48" r="2.8" fill="#ffffff" />
+  <circle cx="74.8" cy="48" r="2.8" fill="#ffffff" />
+
+  <!-- beak -->
+  <path fill="url(#beak)" d="M64 62c4.2 0 7 2.8 7 6.2 0 3.6-3.1 6.8-7 6.8s-7-3.2-7-6.8c0-3.4 2.8-6.2 7-6.2Z" />
+
+  <!-- book, tilted, pages on the right of the spine -->
+  <g transform="rotate(-7 64 95)">
+    <rect x="36" y="82" width="56" height="26" rx="5" fill="url(#cover)" />
+    <rect x="41" y="86" width="46" height="18" rx="3" fill="#fff8ee" />
+    <rect x="41" y="86" width="46" height="18" rx="3" fill="none" stroke="#f2ddba" stroke-width="1" />
+    <path d="M64 84v22" stroke="#e9c9a0" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M47 92h12M47 97h12M69 92h12M69 97h12" stroke="#eadcc6" stroke-width="2" stroke-linecap="round" />
+  </g>
+
+  <!-- wings hugging the book -->
+  <path fill="url(#wing)" d="M25 58c-4 14-2 28 6 38 4 4 9 4 11 0 3-7 2-24-4-38-3-6-11-6-13 0Z" />
+  <path fill="url(#wing)" d="M103 58c4 14 2 28-6 38-4 4-9 4-11 0-3-7-2-24 4-38 3-6 11-6 13 0Z" />
+
+  <!-- toy gloss -->
+  <path fill="url(#gloss)" d="M64 10c26 0 45 19 45 46 0 31-20 52-45 52S19 87 19 56C19 29 38 10 64 10Z" />
+</svg>

@@ -20,10 +20,18 @@ defmodule GameHub.Games.CoCaNgua.Board do
   """
 
   @color_names %{red: "Đỏ", green: "Xanh lá", yellow: "Vàng", blue: "Xanh dương"}
-  @starts %{red: 0, green: 13, yellow: 26, blue: 39}
-  @safe_cells Map.values(@starts)
+  @track_length 56
+  @arm_length div(@track_length, 4)
 
-  @track_length 52
+  # One start per arm: every cell of the loop is walkable, including the four
+  # corner cells where the arms meet, so the arms are 14 long, not 13.
+  @starts %{
+    red: 0,
+    green: @arm_length,
+    yellow: 2 * @arm_length,
+    blue: 3 * @arm_length
+  }
+  @safe_cells Map.values(@starts)
   @home_stretch 6
   @finish @track_length + @home_stretch
   @pieces_per_player 4
@@ -198,7 +206,8 @@ defmodule GameHub.Games.CoCaNgua.Board do
   # over — it can only be landed on exactly (a normal capture) or left short
   # of. Doesn't apply once we've already turned off the loop onto our own
   # private home stretch (no other color's horse can be there).
-  defp path_blocked_by_enemy_piece?(_board, _color, from, _die) when from > @track_length - 1, do: false
+  defp path_blocked_by_enemy_piece?(_board, _color, from, _die) when from > @track_length - 1,
+    do: false
 
   defp path_blocked_by_enemy_piece?(board, color, from, die) do
     own_start = Map.fetch!(@starts, color)
@@ -206,7 +215,9 @@ defmodule GameHub.Games.CoCaNgua.Board do
     Enum.any?(board.pieces, fn
       {{other_color, _idx}, other_pos}
       when other_color != color and is_integer(other_pos) and other_pos <= @track_length - 1 ->
-        other_rel = rem(absolute_cell(other_color, other_pos) - own_start + @track_length, @track_length)
+        other_rel =
+          rem(absolute_cell(other_color, other_pos) - own_start + @track_length, @track_length)
+
         other_rel > from and die > other_rel - from
 
       _ ->

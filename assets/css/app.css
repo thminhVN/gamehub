@@ -99,10 +99,459 @@
 /* Use the data attribute for dark mode  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* Make LiveView wrapper divs transparent for layout */
-[data-phx-session], [data-phx-teleported-src] { display: contents }
+/* =========================================================================
+   Design tokens — "Toy Box" brief, see docs/design/co_ca_ngua_toybox_brief.md
 
-/* This file is for your main application CSS */
+   Registered with @theme so every colour is also a real Tailwind utility
+   (bg-cream, text-ink-soft, border-cream-deep, text-toy-red, rounded-toy-lg…).
+   Templates use those utilities; nothing should hard-code these hex values.
+   ========================================================================= */
+
+@theme {
+  --color-cream: #fff8ee;
+  --color-cream-deep: #fbeed9;
+  --color-cream-edge: #e3d3ba;
+
+  --color-ink: #4a3b32;
+  --color-ink-soft: #8a7a6e;
+
+  --color-toy-red: #ff5a5f;
+  --color-toy-red-dark: #e14448;
+  --color-toy-red-deep: #b52d31;
+  --color-toy-blue: #4da3ff;
+  --color-toy-blue-dark: #2d7dd2;
+  --color-toy-blue-deep: #205a99;
+  --color-toy-yellow: #ffc93c;
+  --color-toy-yellow-dark: #e0a500;
+  --color-toy-green: #3ddc84;
+  --color-toy-green-dark: #21b562;
+  --color-toy-green-deep: #188a4c;
+
+  --color-night: #2a2018;
+  --color-night-deep: #1c1510;
+  --color-night-ink: #f3e9db;
+
+  /* Prefixed so they cannot collide with Tailwind's own --radius-* scale,
+     which powers rounded-sm / rounded-md / rounded-lg. */
+  --radius-toy-sm: 12px;
+  --radius-toy: 18px;
+  --radius-toy-lg: 28px;
+
+  --font-sans: "Nunito", ui-rounded, "Baloo 2", system-ui, sans-serif;
+}
+
+/* =========================================================================
+   Base layer — element defaults on top of Tailwind's preflight reset
+   (preflight ships with `@import "tailwindcss"` above). Keeping these in
+   @layer base is what lets any utility class override them in a template.
+   ========================================================================= */
+
+@layer base {
+  /* Aliases so the game screens can keep referring to the palette as
+     var(--toy-red) etc. The @theme block above stays the single source. */
+  :root {
+    --cream: var(--color-cream);
+    --cream-deep: var(--color-cream-deep);
+    --toy-red: var(--color-toy-red);
+    --toy-red-dark: var(--color-toy-red-dark);
+    --toy-blue: var(--color-toy-blue);
+    --toy-blue-dark: var(--color-toy-blue-dark);
+    --toy-yellow: var(--color-toy-yellow);
+    --toy-yellow-dark: var(--color-toy-yellow-dark);
+    --toy-green: var(--color-toy-green);
+    --toy-green-dark: var(--color-toy-green-dark);
+    --toy-ink: var(--color-ink);
+    --toy-ink-soft: var(--color-ink-soft);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+  }
+
+  /* Make LiveView wrapper divs transparent for layout */
+  [data-phx-session],
+  [data-phx-teleported-src] {
+    display: contents;
+  }
+}
+
+/* =========================================================================
+   Components — multi-property patterns reused across screens. Plain CSS
+   (no @apply) so they stay readable, but inside @layer components so a
+   utility in the markup always wins over them.
+   ========================================================================= */
+
+@layer components {
+  /* --- page background ---------------------------------------------- */
+
+  .gamehub-bg {
+    background: linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-deep) 100%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .gamehub-bg {
+      background: linear-gradient(180deg, var(--color-night) 0%, var(--color-night-deep) 100%);
+      color: var(--color-night-ink);
+    }
+  }
+
+  :root[data-theme="dark"] .gamehub-bg {
+    background: linear-gradient(180deg, var(--color-night) 0%, var(--color-night-deep) 100%);
+    color: var(--color-night-ink);
+  }
+
+  :root[data-theme="light"] .gamehub-bg {
+    background: linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-deep) 100%);
+    color: var(--color-ink);
+  }
+
+  /* --- toy buttons: thick, glossy, squashable capsules ---------------- */
+
+  .toy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-toy);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition:
+      transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 150ms ease,
+      filter 150ms ease;
+    transform: translateY(0);
+  }
+
+  .toy-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+  }
+
+  .toy-btn:active:not(:disabled) {
+    transform: translateY(2px) scale(0.97);
+  }
+
+  .toy-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    transform: none;
+  }
+
+  .toy-btn--red {
+    background: linear-gradient(180deg, var(--color-toy-red) 0%, var(--color-toy-red-dark) 100%);
+    box-shadow:
+      0 4px 0 var(--color-toy-red-deep),
+      0 8px 16px rgba(225, 68, 72, 0.35);
+  }
+
+  .toy-btn--red:active:not(:disabled) {
+    box-shadow:
+      0 1px 0 var(--color-toy-red-deep),
+      0 2px 8px rgba(225, 68, 72, 0.35);
+  }
+
+  .toy-btn--blue {
+    background: linear-gradient(180deg, var(--color-toy-blue) 0%, var(--color-toy-blue-dark) 100%);
+    box-shadow:
+      0 4px 0 var(--color-toy-blue-deep),
+      0 8px 16px rgba(45, 125, 210, 0.35);
+  }
+
+  .toy-btn--blue:active:not(:disabled) {
+    box-shadow:
+      0 1px 0 var(--color-toy-blue-deep),
+      0 2px 8px rgba(45, 125, 210, 0.35);
+  }
+
+  .toy-btn--neutral {
+    background: linear-gradient(180deg, #ffffff 0%, var(--color-cream-deep) 100%);
+    color: var(--color-ink);
+    box-shadow:
+      0 4px 0 var(--color-cream-edge),
+      0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .toy-btn--neutral:active:not(:disabled) {
+    box-shadow:
+      0 1px 0 var(--color-cream-edge),
+      0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .toy-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--color-cream-deep) 100%);
+    box-shadow:
+      0 3px 0 var(--color-cream-edge),
+      0 6px 12px rgba(0, 0, 0, 0.1);
+    border: none;
+    cursor: pointer;
+    color: var(--color-ink);
+    transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .toy-icon-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  .toy-icon-btn:active {
+    transform: translateY(1px) scale(0.95);
+  }
+
+  /* --- cards, chips, badges, medallions ------------------------------- */
+
+  .toy-card {
+    background: #ffffff;
+    border: 2px solid var(--color-cream-deep);
+    border-radius: var(--radius-toy-lg);
+    box-shadow:
+      0 6px 0 rgba(224, 205, 176, 0.5),
+      0 14px 30px rgba(120, 92, 60, 0.1);
+  }
+
+  .toy-card--link {
+    transition:
+      transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 200ms ease;
+  }
+
+  .toy-card--link:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 10px 0 rgba(224, 205, 176, 0.55),
+      0 22px 40px rgba(120, 92, 60, 0.16);
+  }
+
+  .toy-card--soon {
+    background: linear-gradient(180deg, #ffffff 0%, var(--color-cream) 100%);
+  }
+
+  .toy-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 2px solid var(--color-cream-deep);
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--color-ink);
+    box-shadow: 0 2px 0 rgba(224, 205, 176, 0.6);
+  }
+
+  .toy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
+    color: #ffffff;
+  }
+
+  .toy-badge--ready {
+    background: linear-gradient(
+      180deg,
+      var(--color-toy-green) 0%,
+      var(--color-toy-green-dark) 100%
+    );
+    box-shadow: 0 2px 0 var(--color-toy-green-deep);
+  }
+
+  .toy-badge--soon {
+    background: linear-gradient(180deg, #ffffff 0%, var(--color-cream-deep) 100%);
+    color: var(--color-ink-soft);
+    box-shadow: 0 2px 0 rgba(224, 205, 176, 0.8);
+  }
+
+  /* Fullscreen toggle: one button, two glyphs — expand while windowed,
+     shrink while fullscreen, same as a video player. */
+  .fullscreen-btn .fs-shrink,
+  .fullscreen-btn[data-fullscreen="on"] .fs-expand {
+    display: none;
+  }
+
+  .fullscreen-btn[data-fullscreen="on"] .fs-shrink {
+    display: block;
+  }
+
+  .toy-input {
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--radius-toy-sm);
+    border: 2px solid var(--color-cream-deep);
+    background: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    transition: border-color 150ms ease;
+  }
+
+  .toy-input:focus {
+    outline: none;
+    border-color: var(--color-toy-blue);
+  }
+
+  .toy-medallion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 74px;
+    height: 74px;
+    border-radius: 9999px;
+    font-size: 2.1rem;
+    background: linear-gradient(180deg, #ffffff 0%, var(--color-cream-deep) 100%);
+    box-shadow:
+      0 4px 0 rgba(224, 205, 176, 0.8),
+      0 10px 18px rgba(120, 92, 60, 0.12);
+  }
+
+  .landing-band {
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%),
+      var(--color-cream);
+  }
+
+  /* --- player panels (game screen) ------------------------------------ */
+
+  .player-panel {
+    transition:
+      opacity 250ms ease,
+      filter 250ms ease,
+      transform 250ms ease;
+  }
+
+  .player-panel--inactive {
+    opacity: 0.55;
+    filter: saturate(0.7);
+  }
+
+  .player-panel--active {
+    opacity: 1;
+    filter: saturate(1.15);
+  }
+
+  /* --- confetti burst — particles are positioned/coloured inline by JS,
+         this only supplies the fall+spin physics ------------------------ */
+
+  .confetti-piece {
+    position: absolute;
+    top: 0;
+    width: 10px;
+    height: 14px;
+    border-radius: 3px;
+    animation: confetti-fall 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+  }
+
+}
+
+/* =========================================================================
+   Portrait rotate-device gate (game screen, narrow viewports)
+
+   Deliberately UNLAYERED: both elements also carry Tailwind's `flex`
+   utility, and anything inside @layer components would lose to it — the
+   board would stay laid out behind the prompt. Unlayered CSS outranks every
+   cascade layer, which is exactly what this override needs.
+   ========================================================================= */
+
+.rotate-prompt {
+  display: none;
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .rotate-prompt {
+    display: flex;
+  }
+
+  .toybox-screen {
+    display: none;
+  }
+}
+
+/* =========================================================================
+   Animation utilities — single-purpose classes, so they live in the
+   utilities layer where a template can still override them.
+   ========================================================================= */
+
+@layer utilities {
+  .animate-dice-pop {
+    animation: dice-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .animate-dice-pop-delay {
+    animation: dice-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both;
+  }
+
+  .animate-piece-pop {
+    animation: piece-pop 0.3s ease-out both;
+  }
+
+  .animate-movable {
+    animation: movable-glow 0.9s ease-in-out infinite;
+  }
+
+  .animate-current-yard {
+    animation: current-yard-glow 1.6s ease-in-out infinite;
+  }
+
+  .animate-dice-center-pop {
+    animation: dice-center-pop 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .animate-avatar-bounce {
+    animation: avatar-bounce 1.1s ease-in-out infinite;
+  }
+
+  .animate-trophy-pop {
+    animation: trophy-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .animate-sparkle {
+    animation: sparkle-twinkle 1.6s ease-in-out infinite;
+  }
+
+  .animate-phone-rotate {
+    animation: phone-rotate 2.2s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float-soft 4.5s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-soft 6s ease-in-out 0.8s infinite;
+  }
+
+  .animate-scroll-hint {
+    animation: scroll-hint 1.8s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-scroll-hint,
+    .animate-float,
+    .animate-float-slow,
+    .animate-avatar-bounce,
+    .animate-sparkle {
+      animation: none;
+    }
+  }
+}
+
+/* =========================================================================
+   Keyframes
+   ========================================================================= */
 
 @keyframes dice-pop {
   0% {
@@ -121,14 +570,6 @@
   }
 }
 
-.animate-dice-pop {
-  animation: dice-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-.animate-dice-pop-delay {
-  animation: dice-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both;
-}
-
 @keyframes piece-pop {
   0% {
     transform: scale(0.5);
@@ -138,10 +579,6 @@
     transform: scale(1);
     opacity: 1;
   }
-}
-
-.animate-piece-pop {
-  animation: piece-pop 0.3s ease-out both;
 }
 
 @keyframes movable-glow {
@@ -160,10 +597,6 @@
   }
 }
 
-.animate-movable {
-  animation: movable-glow 0.9s ease-in-out infinite;
-}
-
 @keyframes current-yard-glow {
   0%,
   100% {
@@ -172,10 +605,6 @@
   50% {
     box-shadow: 0 0 0 6px var(--yard-glow-color, rgba(99, 102, 241, 0.35));
   }
-}
-
-.animate-current-yard {
-  animation: current-yard-glow 1.6s ease-in-out infinite;
 }
 
 @keyframes dice-center-pop {
@@ -205,188 +634,6 @@
   }
 }
 
-.animate-dice-center-pop {
-  animation: dice-center-pop 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-/* =========================================================================
-   Toy Box design tokens — see docs/design/co_ca_ngua_toybox_brief.md
-   ========================================================================= */
-
-:root {
-  --cream: #fff8ee;
-  --cream-deep: #fbeed9;
-  --toy-red: #ff5a5f;
-  --toy-red-dark: #e14448;
-  --toy-blue: #4da3ff;
-  --toy-blue-dark: #2d7dd2;
-  --toy-yellow: #ffc93c;
-  --toy-yellow-dark: #e0a500;
-  --toy-green: #3ddc84;
-  --toy-green-dark: #21b562;
-  --toy-ink: #4a3b32;
-  --toy-ink-soft: #8a7a6e;
-  --radius-lg: 28px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
-}
-
-body {
-  font-family:
-    "Nunito",
-    ui-rounded,
-    "Baloo 2",
-    system-ui,
-    sans-serif;
-  color: var(--toy-ink);
-}
-
-.gamehub-bg {
-  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
-}
-
-@media (prefers-color-scheme: dark) {
-  .gamehub-bg {
-    background: linear-gradient(180deg, #2a2018 0%, #1c1510 100%);
-    color: #f3e9db;
-  }
-}
-
-:root[data-theme="dark"] .gamehub-bg {
-  background: linear-gradient(180deg, #2a2018 0%, #1c1510 100%);
-  color: #f3e9db;
-}
-
-:root[data-theme="light"] .gamehub-bg {
-  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
-  color: var(--toy-ink);
-}
-
-/* =========================================================================
-   Toy buttons — thick, glossy, squashable capsules
-   ========================================================================= */
-
-.toy-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 48px;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition:
-    transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 150ms ease,
-    filter 150ms ease;
-  transform: translateY(0);
-}
-
-.toy-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-}
-
-.toy-btn:active:not(:disabled) {
-  transform: translateY(2px) scale(0.97);
-}
-
-.toy-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-  transform: none;
-}
-
-.toy-btn--red {
-  background: linear-gradient(180deg, var(--toy-red) 0%, var(--toy-red-dark) 100%);
-  box-shadow:
-    0 4px 0 #b52d31,
-    0 8px 16px rgba(225, 68, 72, 0.35);
-}
-
-.toy-btn--red:active:not(:disabled) {
-  box-shadow:
-    0 1px 0 #b52d31,
-    0 2px 8px rgba(225, 68, 72, 0.35);
-}
-
-.toy-btn--blue {
-  background: linear-gradient(180deg, var(--toy-blue) 0%, var(--toy-blue-dark) 100%);
-  box-shadow:
-    0 4px 0 #205a99,
-    0 8px 16px rgba(45, 125, 210, 0.35);
-}
-
-.toy-btn--blue:active:not(:disabled) {
-  box-shadow:
-    0 1px 0 #205a99,
-    0 2px 8px rgba(45, 125, 210, 0.35);
-}
-
-.toy-btn--neutral {
-  background: linear-gradient(180deg, #ffffff 0%, var(--cream-deep) 100%);
-  color: var(--toy-ink);
-  box-shadow:
-    0 4px 0 #e3d3ba,
-    0 8px 16px rgba(0, 0, 0, 0.08);
-}
-
-.toy-btn--neutral:active:not(:disabled) {
-  box-shadow:
-    0 1px 0 #e3d3ba,
-    0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.toy-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, #ffffff 0%, var(--cream-deep) 100%);
-  box-shadow:
-    0 3px 0 #e3d3ba,
-    0 6px 12px rgba(0, 0, 0, 0.1);
-  border: none;
-  cursor: pointer;
-  color: var(--toy-ink);
-  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.toy-icon-btn:hover {
-  transform: translateY(-2px) scale(1.05);
-}
-
-.toy-icon-btn:active {
-  transform: translateY(1px) scale(0.95);
-}
-
-/* =========================================================================
-   Player panels
-   ========================================================================= */
-
-.player-panel {
-  transition:
-    opacity 250ms ease,
-    filter 250ms ease,
-    transform 250ms ease;
-}
-
-.player-panel--inactive {
-  opacity: 0.55;
-  filter: saturate(0.7);
-}
-
-.player-panel--active {
-  opacity: 1;
-  filter: saturate(1.15);
-}
-
 @keyframes avatar-bounce {
   0%,
   100% {
@@ -397,15 +644,6 @@ body {
   }
 }
 
-.animate-avatar-bounce {
-  animation: avatar-bounce 1.1s ease-in-out infinite;
-}
-
-/* =========================================================================
-   Confetti burst — particles positioned/colored via inline style by JS,
-   this only supplies the fall+spin physics.
-   ========================================================================= */
-
 @keyframes confetti-fall {
   0% {
     transform: translate3d(0, -20px, 0) rotate(0deg);
@@ -415,15 +653,6 @@ body {
     transform: translate3d(var(--drift, 0px), 420px, 0) rotate(540deg);
     opacity: 0;
   }
-}
-
-.confetti-piece {
-  position: absolute;
-  top: 0;
-  width: 10px;
-  height: 14px;
-  border-radius: 3px;
-  animation: confetti-fall 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
 }
 
 @keyframes trophy-pop {
@@ -441,10 +670,6 @@ body {
   }
 }
 
-.animate-trophy-pop {
-  animation: trophy-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
 @keyframes sparkle-twinkle {
   0%,
   100% {
@@ -455,18 +680,6 @@ body {
     transform: scale(1.15) rotate(20deg);
     opacity: 1;
   }
-}
-
-.animate-sparkle {
-  animation: sparkle-twinkle 1.6s ease-in-out infinite;
-}
-
-/* =========================================================================
-   Portrait rotate-device prompt (game screen only, narrow viewports)
-   ========================================================================= */
-
-.rotate-prompt {
-  display: none;
 }
 
 @keyframes phone-rotate {
@@ -483,16 +696,24 @@ body {
   }
 }
 
-.animate-phone-rotate {
-  animation: phone-rotate 2.2s ease-in-out infinite;
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(4deg);
+  }
 }
 
-@media (orientation: portrait) and (max-width: 900px) {
-  .rotate-prompt {
-    display: flex;
+@keyframes scroll-hint {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
   }
-
-  .toybox-screen {
-    display: none;
+  50% {
+    transform: translateY(5px);
+    opacity: 1;
   }
 }

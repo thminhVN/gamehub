@@ -2,7 +2,7 @@
 // opens instantly. Deliberately does NOT touch page navigations or /live —
 // gameplay runs over a live LiveView socket and needs a real connection;
 // this service worker only makes the shell load fast, not offline-playable.
-const CACHE_NAME = "be-vui-hoc-shell-v2";
+const CACHE_NAME = "be-vui-hoc-shell-v5";
 
 const PRECACHE_URLS = [
   "/manifest.json",
@@ -20,6 +20,34 @@ const PRECACHE_URLS = [
   "/images/assets/die_5.webp",
   "/images/assets/die_6.webp",
   "/images/assets/trophy_gold.webp",
+  // Landing page: hero illustration + the generated toy icon family.
+  "/images/landing/hero_family.webp",
+  "/images/ui/logo.webp",
+  "/images/ui/dice.webp",
+  "/images/ui/horse.webp",
+  "/images/ui/trophy.webp",
+  "/images/ui/device.webp",
+  "/images/ui/family.webp",
+  "/images/ui/tap.webp",
+  "/images/ui/shield.webp",
+  "/images/ui/offline.webp",
+  "/images/ui/brain.webp",
+  "/images/ui/players.webp",
+  "/images/ui/age.webp",
+  "/images/ui/timer.webp",
+  "/images/ui/together.webp",
+  "/images/ui/check.webp",
+  "/images/ui/party.webp",
+  "/images/ui/piece_chess.webp",
+  "/images/ui/piece_go.webp",
+  "/images/ui/piece_xiangqi.webp",
+  // Game screen controls.
+  "/images/ui/settings.webp",
+  "/images/ui/restart.webp",
+  "/images/ui/home.webp",
+  "/images/ui/exit.webp",
+  "/images/ui/undo.webp",
+  "/images/ui/phone.webp",
 ];
 
 self.addEventListener("install", (event) => {

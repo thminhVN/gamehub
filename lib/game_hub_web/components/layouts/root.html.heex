@@ -6,6 +6,22 @@
     <meta name="csrf-token" content={get_csrf_token()} />
     <.live_title default="Bé vui học" phx-no-format>{assigns[:page_title]}</.live_title>
 
+    <meta
+      name="description"
+      content="Bé vui học — các trò chơi cờ bàn cho cả nhà chơi chung trên một thiết bị. Miễn phí, không quảng cáo, không cần tài khoản, không cần mạng."
+    />
+    <meta
+      property="og:title"
+      content="Bé vui học — Cả nhà cùng chơi cờ trên 1 thiết bị"
+    />
+    <meta
+      property="og:description"
+      content="Đặt máy giữa bàn, chọn 2–4 người rồi thay phiên nhau chạm. Cờ cá ngựa chơi được ngay; cờ vua, cờ tướng, cờ vây sắp ra mắt."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={url(~p"/images/landing/hero_family.webp")} />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#ff5a5f" />
     <link rel="icon" href="/images/icons/icon-192.png" type="image/png" />

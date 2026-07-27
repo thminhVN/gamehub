@@ -32,6 +32,140 @@ defmodule GameHubWeb.CoreComponents do
   alias Phoenix.LiveView.JS
 
   @doc """
+  Renders one icon from the generated "toy box" icon family in
+  `priv/static/images/ui` — the only icon set this app uses, so screens never
+  fall back to platform emoji, which look different on every device.
+
+  Icons are decorative: each one sits next to the text it illustrates, so it is
+  hidden from screen readers rather than given a label of its own.
+
+  ## Examples
+
+      <.toy_icon name="dice" />
+      <.toy_icon name="trophy" class="h-8 w-8" />
+  """
+  attr :name, :string, required: true, doc: "file name (without extension) under /images/ui"
+  attr :class, :string, default: "h-6 w-6"
+
+  def toy_icon(assigns) do
+    ~H"""
+    <img
+      src={"/images/ui/#{@name}.webp"}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      class={["inline-block shrink-0 object-contain", @class]}
+    />
+    """
+  end
+
+  @doc """
+  Renders a fullscreen toggle, the way a video player does: one button that
+  expands the page to the whole screen and turns into a "shrink" button while
+  it is on.
+
+  Starts hidden and is revealed by the hook only when the browser can actually
+  do it — iPhone Safari has no element fullscreen, and a button that does
+  nothing is worse than no button. The glyph is a plain stroked icon rather
+  than a toy render because it is a viewport control, not part of the game.
+
+  ## Examples
+
+      <.fullscreen_button />
+      <.fullscreen_button class="!h-10 !w-10" />
+  """
+  attr :class, :string, default: nil
+  attr :id, :string, default: "fullscreen-toggle"
+
+  def fullscreen_button(assigns) do
+    ~H"""
+    <button
+      id={@id}
+      type="button"
+      hidden
+      phx-hook=".Fullscreen"
+      phx-update="ignore"
+      class={["toy-icon-btn fullscreen-btn", @class]}
+      aria-label="Xem toàn màn hình"
+      title="Xem toàn màn hình"
+    >
+      <svg
+        class="fs-expand h-6 w-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M4 9V6a2 2 0 0 1 2-2h3" />
+        <path d="M15 4h3a2 2 0 0 1 2 2v3" />
+        <path d="M20 15v3a2 2 0 0 1-2 2h-3" />
+        <path d="M9 20H6a2 2 0 0 1-2-2v-3" />
+      </svg>
+      <svg
+        class="fs-shrink h-6 w-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M9 4v3a2 2 0 0 1-2 2H4" />
+        <path d="M20 9h-3a2 2 0 0 1-2-2V4" />
+        <path d="M15 20v-3a2 2 0 0 1 2-2h3" />
+        <path d="M4 15h3a2 2 0 0 1 2 2v3" />
+      </svg>
+    </button>
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".Fullscreen">
+      const target = () => document.documentElement
+      const isOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement)
+      const supported = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled)
+
+      export default {
+        mounted() {
+          if (!supported()) return
+
+          this.el.hidden = false
+
+          this.sync = () => {
+            const on = isOn()
+            this.el.dataset.fullscreen = on ? "on" : "off"
+            const label = on ? "Thoát toàn màn hình" : "Xem toàn màn hình"
+            this.el.setAttribute("aria-label", label)
+            this.el.setAttribute("title", label)
+          }
+
+          this.toggle = () => {
+            if (isOn()) {
+              const exit = document.exitFullscreen || document.webkitExitFullscreen
+              Promise.resolve(exit.call(document)).catch(() => {})
+            } else {
+              const el = target()
+              const request = el.requestFullscreen || el.webkitRequestFullscreen
+              Promise.resolve(request.call(el, {navigationUI: "hide"})).catch(() => {})
+            }
+          }
+
+          this.el.addEventListener("click", this.toggle)
+          document.addEventListener("fullscreenchange", this.sync)
+          document.addEventListener("webkitfullscreenchange", this.sync)
+          this.sync()
+        },
+
+        destroyed() {
+          document.removeEventListener("fullscreenchange", this.sync)
+          document.removeEventListener("webkitfullscreenchange", this.sync)
+        }
+      }
+    </script>
+    """
+  end
+
+  @doc """
   Renders flash notices.
 
   ## Examples

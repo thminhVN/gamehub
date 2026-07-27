@@ -136,7 +136,10 @@ defmodule GameHub.Games.CoCaNgua.SimulationTest do
             own_start = Board.start_cell(color)
 
             other_rel =
-              rem(Board.absolute_cell(other_color, other_pos) - own_start + @track_length, @track_length)
+              rem(
+                Board.absolute_cell(other_color, other_pos) - own_start + @track_length,
+                @track_length
+              )
 
             other_rel > from and die > other_rel - from
 
@@ -224,9 +227,15 @@ defmodule GameHub.Games.CoCaNgua.SimulationTest do
           assert MapSet.new(captured) == MapSet.new(expected_captured),
                  "release-capture mismatch: expected #{inspect(expected_captured)}, got #{inspect(captured)}"
 
-          assert Enum.all?(captured, fn {c, i, _} -> Map.fetch!(after_board.pieces, {c, i}) == :home end)
+          assert Enum.all?(captured, fn {c, i, _} ->
+                   Map.fetch!(after_board.pieces, {c, i}) == :home
+                 end)
 
-          stats = if captured != [], do: %{stats | captures: stats.captures + length(captured)}, else: stats
+          stats =
+            if captured != [],
+              do: %{stats | captures: stats.captures + length(captured)},
+              else: stats
+
           %{stats | releases: stats.releases + 1}
 
         action when action in [:move, :finish] and move.new_pos <= @track_length - 1 ->
@@ -249,10 +258,16 @@ defmodule GameHub.Games.CoCaNgua.SimulationTest do
             assert MapSet.new(captured) == MapSet.new(expected_captured),
                    "capture mismatch: expected #{inspect(expected_captured)}, got #{inspect(captured)}"
 
-            assert Enum.all?(captured, fn {c, i, _} -> Map.fetch!(after_board.pieces, {c, i}) == :home end)
+            assert Enum.all?(captured, fn {c, i, _} ->
+                     Map.fetch!(after_board.pieces, {c, i}) == :home
+                   end)
           end
 
-          stats = if captured != [], do: %{stats | captures: stats.captures + length(captured)}, else: stats
+          stats =
+            if captured != [],
+              do: %{stats | captures: stats.captures + length(captured)},
+              else: stats
+
           if move.action == :finish, do: %{stats | finishes: stats.finishes + 1}, else: stats
 
         _ ->

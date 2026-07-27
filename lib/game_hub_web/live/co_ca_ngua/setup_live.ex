@@ -43,17 +43,25 @@ defmodule GameHubWeb.CoCaNgua.SetupLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-xl px-4 py-16">
-      <.link navigate={~p"/"} class="text-sm font-semibold hover:underline" style="color: var(--toy-ink-soft);">
+      <.link
+        navigate={~p"/"}
+        class="text-sm font-semibold hover:underline text-ink-soft"
+      >
         &larr; Bé vui học
       </.link>
 
-      <h1 class="mt-2 text-4xl font-bold tracking-tight" style="color: var(--toy-ink);">🐴 Cờ cá ngựa</h1>
-      <p class="mt-1 text-sm" style="color: var(--toy-ink-soft);">
+      <div class="mt-2 flex items-center justify-between gap-3">
+        <h1 class="flex items-center gap-2 text-4xl font-bold tracking-tight text-ink">
+          <.toy_icon name="horse" class="h-10 w-10" /> Cờ cá ngựa
+        </h1>
+        <.fullscreen_button id="setup-fullscreen" />
+      </div>
+      <p class="mt-1 text-sm text-ink-soft">
         Chơi trên 1 thiết bị, lần lượt từng người. Mỗi người 4 con ngựa.
       </p>
 
-      <div class="mt-8 rounded-[28px] border-2 bg-white p-5 shadow-md" style="border-color: var(--cream-deep);">
-        <h2 class="text-sm font-bold" style="color: var(--toy-ink);">Số người chơi</h2>
+      <div class="toy-card mt-8 p-5">
+        <h2 class="text-sm font-bold text-ink">Số người chơi</h2>
         <div class="mt-2 flex gap-2">
           <button
             :for={n <- 2..4}
@@ -70,10 +78,13 @@ defmodule GameHubWeb.CoCaNgua.SetupLive do
         </div>
       </div>
 
-      <div class="mt-4 rounded-[28px] border-2 bg-white p-5 shadow-md" style="border-color: var(--cream-deep);">
-        <h2 class="text-sm font-bold" style="color: var(--toy-ink);">Tên người chơi (tùy chọn)</h2>
+      <div class="toy-card mt-4 p-5">
+        <h2 class="text-sm font-bold text-ink">Tên người chơi (tùy chọn)</h2>
         <div class="mt-2 space-y-2">
-          <div :for={{color, i} <- Enum.with_index(colors_for(@num_players))} class="flex items-center gap-2">
+          <div
+            :for={{color, i} <- Enum.with_index(colors_for(@num_players))}
+            class="flex items-center gap-2"
+          >
             <span class={["h-5 w-5 shrink-0 rounded-full shadow", color_bg(color)]}></span>
             <input
               type="text"
@@ -81,15 +92,14 @@ defmodule GameHubWeb.CoCaNgua.SetupLive do
               phx-blur="update_name"
               phx-value-index={i}
               placeholder={"Người chơi #{i + 1} (#{color_label(color)})"}
-              class="w-full rounded-xl border-2 px-3 py-2.5 text-sm focus:outline-none"
-              style="border-color: var(--cream-deep); color: var(--toy-ink);"
+              class="toy-input w-full"
             />
           </div>
         </div>
       </div>
 
       <button type="button" phx-click="start_game" class="toy-btn toy-btn--red mt-6 w-full !text-xl">
-        Bắt đầu chơi 🎉
+        Bắt đầu chơi <.toy_icon name="party" class="h-7 w-7" />
       </button>
     </div>
     """
@@ -104,8 +114,8 @@ defmodule GameHubWeb.CoCaNgua.SetupLive do
   defp color_label(:yellow), do: "Vàng"
   defp color_label(:blue), do: "Xanh dương"
 
-  defp color_bg(:red), do: "bg-red-500"
-  defp color_bg(:green), do: "bg-emerald-500"
-  defp color_bg(:yellow), do: "bg-yellow-400"
-  defp color_bg(:blue), do: "bg-blue-500"
+  defp color_bg(:red), do: "bg-toy-red"
+  defp color_bg(:green), do: "bg-toy-green"
+  defp color_bg(:yellow), do: "bg-toy-yellow"
+  defp color_bg(:blue), do: "bg-toy-blue"
 end

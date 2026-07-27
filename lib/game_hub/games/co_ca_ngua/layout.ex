@@ -11,21 +11,69 @@ defmodule GameHub.Games.CoCaNgua.Layout do
   @track_length Board.track_length()
   @finish_position Board.finish_position()
 
-  # 52 cells of the outer loop, 0-indexed {row, col}, in path order. Index 0 is
-  # red's start square: the cell directly below the corner of red's yard, i.e.
-  # the very first cell exiting the yard (not one cell further in).
+  # The full outer loop, 0-indexed {row, col}, in path order. Index 0 is red's
+  # start square: the cell directly below the corner of red's yard, i.e. the
+  # very first cell exiting the yard (not one cell further in).
+  #
+  # Every drawn cell is in here, including the four corner cells where two arms
+  # meet ({6,6} {6,8} {8,8} {8,6}) — a horse steps on them like any other, so
+  # the count a player sees on the board never skips a square.
   @main_track [
-    {6, 0}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5},
-    {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6}, {0, 6},
+    {6, 0},
+    {6, 1},
+    {6, 2},
+    {6, 3},
+    {6, 4},
+    {6, 5},
+    {6, 6},
+    {5, 6},
+    {4, 6},
+    {3, 6},
+    {2, 6},
+    {1, 6},
+    {0, 6},
     {0, 7},
-    {0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8},
-    {6, 9}, {6, 10}, {6, 11}, {6, 12}, {6, 13}, {6, 14},
+    {0, 8},
+    {1, 8},
+    {2, 8},
+    {3, 8},
+    {4, 8},
+    {5, 8},
+    {6, 8},
+    {6, 9},
+    {6, 10},
+    {6, 11},
+    {6, 12},
+    {6, 13},
+    {6, 14},
     {7, 14},
-    {8, 14}, {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9},
-    {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8}, {14, 8},
+    {8, 14},
+    {8, 13},
+    {8, 12},
+    {8, 11},
+    {8, 10},
+    {8, 9},
+    {8, 8},
+    {9, 8},
+    {10, 8},
+    {11, 8},
+    {12, 8},
+    {13, 8},
+    {14, 8},
     {14, 7},
-    {14, 6}, {13, 6}, {12, 6}, {11, 6}, {10, 6}, {9, 6},
-    {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {8, 0},
+    {14, 6},
+    {13, 6},
+    {12, 6},
+    {11, 6},
+    {10, 6},
+    {9, 6},
+    {8, 6},
+    {8, 5},
+    {8, 4},
+    {8, 3},
+    {8, 2},
+    {8, 1},
+    {8, 0},
     {7, 0}
   ]
 
@@ -63,7 +111,7 @@ defmodule GameHub.Games.CoCaNgua.Layout do
 
   def yard_bounds(color), do: shift(Map.fetch!(@yard_bounds, color))
 
-  @doc "1-indexed {row, col} for background rendering of main-track cell `idx` (0..51)."
+  @doc "1-indexed {row, col} for background rendering of a main-track cell."
   def main_track_coord(idx) when idx in 0..(@track_length - 1)//1 do
     Enum.at(@main_track, idx) |> shift()
   end
