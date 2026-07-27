@@ -1,0 +1,498 @@
+/* See the Tailwind configuration guide for advanced usage
+   https://tailwindcss.com/docs/configuration */
+
+@import "tailwindcss" source(none);
+@import "phoenix-colocated/game_hub/colocated.css";
+@source "../css";
+@source "../js";
+@source "../../lib/game_hub_web";
+/* Required for Tailwind to automatically pick up changes in colocated CSS files in dev */
+@source "../../_build/dev/phoenix-colocated/game_hub/*/";
+
+/* A Tailwind plugin that makes "hero-#{ICON}" classes available.
+   The heroicons installation itself is managed by your mix.exs */
+@plugin "../vendor/heroicons";
+
+/* daisyUI Tailwind Plugin. */
+@plugin "daisyui/packages/bundle/daisyui" {
+  themes: false;
+}
+
+/* daisyUI theme plugin.
+  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
+  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
+@plugin "daisyui/packages/bundle/daisyui-theme" {
+  name: "dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(30.33% 0.016 252.42);
+  --color-base-200: oklch(25.26% 0.014 253.1);
+  --color-base-300: oklch(20.15% 0.012 254.09);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: oklch(58% 0.233 277.117);
+  --color-primary-content: oklch(96% 0.018 272.314);
+  --color-secondary: oklch(58% 0.233 277.117);
+  --color-secondary-content: oklch(96% 0.018 272.314);
+  --color-accent: oklch(60% 0.25 292.717);
+  --color-accent-content: oklch(96% 0.016 293.756);
+  --color-neutral: oklch(37% 0.044 257.287);
+  --color-neutral-content: oklch(98% 0.003 247.858);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(60% 0.118 184.704);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin "daisyui/packages/bundle/daisyui-theme" {
+  name: "light";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(98% 0 0);
+  --color-base-200: oklch(96% 0.001 286.375);
+  --color-base-300: oklch(92% 0.004 286.32);
+  --color-base-content: oklch(21% 0.006 285.885);
+  --color-primary: oklch(70% 0.213 47.604);
+  --color-primary-content: oklch(98% 0.016 73.684);
+  --color-secondary: oklch(55% 0.027 264.364);
+  --color-secondary-content: oklch(98% 0.002 247.839);
+  --color-accent: oklch(0% 0 0);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(44% 0.017 285.786);
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(62% 0.214 259.815);
+  --color-info-content: oklch(97% 0.014 254.604);
+  --color-success: oklch(70% 0.14 182.503);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Add variants based on LiveView classes */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Use the data attribute for dark mode  */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
+
+/* This file is for your main application CSS */
+
+@keyframes dice-pop {
+  0% {
+    transform: scale(0.2) rotate(-25deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.2) rotate(12deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.92) rotate(-6deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-dice-pop {
+  animation: dice-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-dice-pop-delay {
+  animation: dice-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both;
+}
+
+@keyframes piece-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-piece-pop {
+  animation: piece-pop 0.3s ease-out both;
+}
+
+@keyframes movable-glow {
+  0%,
+  100% {
+    transform: scale(1.15) translateY(-2px);
+    box-shadow:
+      0 0 0 3px rgba(245, 158, 11, 0.95),
+      0 0 14px 6px rgba(245, 158, 11, 0.75);
+  }
+  50% {
+    transform: scale(1.3) translateY(-6px);
+    box-shadow:
+      0 0 0 5px rgba(245, 158, 11, 1),
+      0 0 26px 12px rgba(245, 158, 11, 0.95);
+  }
+}
+
+.animate-movable {
+  animation: movable-glow 0.9s ease-in-out infinite;
+}
+
+@keyframes current-yard-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px var(--yard-glow-color, rgba(99, 102, 241, 0.6));
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--yard-glow-color, rgba(99, 102, 241, 0.35));
+  }
+}
+
+.animate-current-yard {
+  animation: current-yard-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes dice-center-pop {
+  0% {
+    transform: scale(0.2) rotate(-35deg);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.35) rotate(18deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05) rotate(-10deg);
+    opacity: 1;
+  }
+  65% {
+    transform: scale(1.15) rotate(6deg);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+.animate-dice-center-pop {
+  animation: dice-center-pop 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* =========================================================================
+   Toy Box design tokens — see docs/design/co_ca_ngua_toybox_brief.md
+   ========================================================================= */
+
+:root {
+  --cream: #fff8ee;
+  --cream-deep: #fbeed9;
+  --toy-red: #ff5a5f;
+  --toy-red-dark: #e14448;
+  --toy-blue: #4da3ff;
+  --toy-blue-dark: #2d7dd2;
+  --toy-yellow: #ffc93c;
+  --toy-yellow-dark: #e0a500;
+  --toy-green: #3ddc84;
+  --toy-green-dark: #21b562;
+  --toy-ink: #4a3b32;
+  --toy-ink-soft: #8a7a6e;
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+}
+
+body {
+  font-family:
+    "Fredoka",
+    ui-rounded,
+    "Baloo 2",
+    system-ui,
+    sans-serif;
+  color: var(--toy-ink);
+}
+
+.gamehub-bg {
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .gamehub-bg {
+    background: linear-gradient(180deg, #2a2018 0%, #1c1510 100%);
+    color: #f3e9db;
+  }
+}
+
+:root[data-theme="dark"] .gamehub-bg {
+  background: linear-gradient(180deg, #2a2018 0%, #1c1510 100%);
+  color: #f3e9db;
+}
+
+:root[data-theme="light"] .gamehub-bg {
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
+  color: var(--toy-ink);
+}
+
+/* =========================================================================
+   Toy buttons — thick, glossy, squashable capsules
+   ========================================================================= */
+
+.toy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 150ms ease,
+    filter 150ms ease;
+  transform: translateY(0);
+}
+
+.toy-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.toy-btn:active:not(:disabled) {
+  transform: translateY(2px) scale(0.97);
+}
+
+.toy-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
+.toy-btn--red {
+  background: linear-gradient(180deg, var(--toy-red) 0%, var(--toy-red-dark) 100%);
+  box-shadow:
+    0 4px 0 #b52d31,
+    0 8px 16px rgba(225, 68, 72, 0.35);
+}
+
+.toy-btn--red:active:not(:disabled) {
+  box-shadow:
+    0 1px 0 #b52d31,
+    0 2px 8px rgba(225, 68, 72, 0.35);
+}
+
+.toy-btn--blue {
+  background: linear-gradient(180deg, var(--toy-blue) 0%, var(--toy-blue-dark) 100%);
+  box-shadow:
+    0 4px 0 #205a99,
+    0 8px 16px rgba(45, 125, 210, 0.35);
+}
+
+.toy-btn--blue:active:not(:disabled) {
+  box-shadow:
+    0 1px 0 #205a99,
+    0 2px 8px rgba(45, 125, 210, 0.35);
+}
+
+.toy-btn--neutral {
+  background: linear-gradient(180deg, #ffffff 0%, var(--cream-deep) 100%);
+  color: var(--toy-ink);
+  box-shadow:
+    0 4px 0 #e3d3ba,
+    0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.toy-btn--neutral:active:not(:disabled) {
+  box-shadow:
+    0 1px 0 #e3d3ba,
+    0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.toy-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--cream-deep) 100%);
+  box-shadow:
+    0 3px 0 #e3d3ba,
+    0 6px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  color: var(--toy-ink);
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toy-icon-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.toy-icon-btn:active {
+  transform: translateY(1px) scale(0.95);
+}
+
+/* =========================================================================
+   Player panels
+   ========================================================================= */
+
+.player-panel {
+  transition:
+    opacity 250ms ease,
+    filter 250ms ease,
+    transform 250ms ease;
+}
+
+.player-panel--inactive {
+  opacity: 0.55;
+  filter: saturate(0.7);
+}
+
+.player-panel--active {
+  opacity: 1;
+  filter: saturate(1.15);
+}
+
+@keyframes avatar-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(3deg);
+  }
+}
+
+.animate-avatar-bounce {
+  animation: avatar-bounce 1.1s ease-in-out infinite;
+}
+
+/* =========================================================================
+   Confetti burst — particles positioned/colored via inline style by JS,
+   this only supplies the fall+spin physics.
+   ========================================================================= */
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift, 0px), 420px, 0) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  animation: confetti-fall 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+}
+
+@keyframes trophy-pop {
+  0% {
+    transform: scale(0.3) rotate(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-trophy-pop {
+  animation: trophy-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes sparkle-twinkle {
+  0%,
+  100% {
+    transform: scale(0.8) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15) rotate(20deg);
+    opacity: 1;
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle-twinkle 1.6s ease-in-out infinite;
+}
+
+/* =========================================================================
+   Portrait rotate-device prompt (game screen only, narrow viewports)
+   ========================================================================= */
+
+.rotate-prompt {
+  display: none;
+}
+
+@keyframes phone-rotate {
+  0%,
+  15% {
+    transform: rotate(0deg);
+  }
+  50%,
+  65% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
+.animate-phone-rotate {
+  animation: phone-rotate 2.2s ease-in-out infinite;
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .rotate-prompt {
+    display: flex;
+  }
+
+  .toybox-screen {
+    display: none;
+  }
+}

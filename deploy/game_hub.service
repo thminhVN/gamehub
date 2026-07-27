@@ -1,0 +1,24 @@
+[Unit]
+Description=GameHub (Phoenix/Elixir, hot-upgradeable release)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Run as the same user that owns the dirs and builds/installs the release,
+# so `bin/game_hub install/commit` can RPC into this running node.
+User=game_hub
+Group=game_hub
+WorkingDirectory=/opt/game_hub
+# The extracted release root (releases/ accumulate here for hot upgrades).
+ExecStart=/opt/game_hub/app/bin/game_hub start
+ExecStop=/opt/game_hub/app/bin/game_hub stop
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+NoNewPrivileges=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
