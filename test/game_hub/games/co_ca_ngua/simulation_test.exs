@@ -109,25 +109,58 @@ defmodule GameHub.Games.CoCaNgua.SimulationTest do
     end
   end
 
+  # Independently recompute, from raw positions, whether `color`'s piece `idx`
+  # moving from `from` by `die` is blocked: landing on or hopping over one of
+  # its own horses, or hopping clean over an enemy horse ahead of it on the
+  # shared loop (landing exactly on an enemy is a normal capture, not blocked).
+  defp move_blocked?(board, color, idx, from, die) do
+    to = from + die
+
+    own_blocked? =
+      Enum.any?(0..(@pieces_per_player - 1), fn other ->
+        other != idx and
+          case Map.get(board.pieces, {color, other}) do
+            other_pos when is_integer(other_pos) ->
+              (other_pos == to and to != @finish) or (other_pos > from and other_pos < to)
+
+            _ ->
+              false
+          end
+      end)
+
+    enemy_blocked? =
+      from <= @track_length - 1 and
+        Enum.any?(board.pieces, fn
+          {{other_color, _other_idx}, other_pos}
+          when other_color != color and is_integer(other_pos) and other_pos <= @track_length - 1 ->
+            own_start = Board.start_cell(color)
+
+            other_rel =
+              rem(Board.absolute_cell(other_color, other_pos) - own_start + @track_length, @track_length)
+
+            other_rel > from and die > other_rel - from
+
+          _ ->
+            false
+        end)
+
+    own_blocked? or enemy_blocked?
+  end
+
   # Independently recompute, from raw positions, that no piece of `color` has
   # any legal move for `die` — without calling Board.legal_moves/1.
   defp verify_no_legal_moves!(board, color, die) do
     refute Enum.any?(0..(@pieces_per_player - 1), fn idx ->
              case Map.fetch!(board.pieces, {color, idx}) do
                :home ->
-                 die == 6 and
+                 die in [1, 6] and
                    not Enum.any?(0..(@pieces_per_player - 1), fn other ->
                      other != idx and Map.get(board.pieces, {color, other}) == 0
                    end)
 
                pos when is_integer(pos) ->
                  new_pos = pos + die
-
-                 new_pos <= @finish and
-                   not Enum.any?(0..(@pieces_per_player - 1), fn other ->
-                     other != idx and Map.get(board.pieces, {color, other}) == new_pos and
-                       new_pos != @finish
-                   end)
+                 new_pos <= @finish and not move_blocked?(board, color, idx, pos, die)
              end
            end),
            "engine reported no legal moves but a raw recomputation found one"
@@ -136,7 +169,7 @@ defmodule GameHub.Games.CoCaNgua.SimulationTest do
   # Re-derive legality from raw board state, independent of Board.legal_moves/1.
   defp verify_move_preconditions!(board, %{piece: {color, idx} = piece_key, action: :release}) do
     assert Map.fetch!(board.pieces, piece_key) == :home
-    assert board.die == 6
+    assert board.die in [1, 6]
 
     refute Enum.any?(0..(@pieces_per_player - 1), fn other ->
              other != idx and Map.get(board.pieces, {color, other}) == 0
@@ -153,10 +186,8 @@ defmodule GameHub.Games.CoCaNgua.SimulationTest do
 
     {color, idx} = piece_key
 
-    refute Enum.any?(0..(@pieces_per_player - 1), fn other ->
-             other != idx and Map.get(board.pieces, {color, other}) == new_pos and new_pos != @finish
-           end),
-           "landed on a square already occupied by another own piece"
+    refute move_blocked?(board, color, idx, pos, board.die),
+           "move was allowed despite being blocked by an own or enemy horse ahead"
   end
 
   # Cross-check capture/safety/win effects against a from-scratch recomputation.

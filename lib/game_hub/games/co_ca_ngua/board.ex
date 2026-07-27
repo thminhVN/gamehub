@@ -4,15 +4,18 @@ defmodule GameHub.Games.CoCaNgua.Board do
   player, 2-4 players, one die per turn, played on a single device (pass-and-play).
 
   Rules implemented:
-  - A horse leaves chuồng (yard) only when the die shows 6, and only if the
+  - A horse leaves chuồng (yard) when the die shows 1 or 6, and only if the
     start square isn't already occupied by another of that player's horses.
   - Rolling a 6 grants an extra turn.
   - Rolling three 6s in a row forfeits that turn (no move is made).
   - A horse must land on the exact final square to finish (overshoot is illegal).
   - Landing exactly on an opponent's horse sends it back to chuồng, except on safe
     squares (each color's own start square).
-  - A player's own horses may never occupy the same square (that specific move is
-    illegal, pick a different one).
+  - A player's own horses may never occupy the same square, nor hop over one
+    another — a die roll that would land on or pass an own horse is illegal.
+  - A horse may not hop clean over an opposing horse either. It can still land
+    exactly on one (a normal capture), or stop short of it, but a roll that
+    would carry it past an enemy's square without landing there is illegal.
   - First player to get all 4 horses to the finish wins; game ends immediately.
   """
 
@@ -136,7 +139,7 @@ defmodule GameHub.Games.CoCaNgua.Board do
   def legal_moves(_board), do: []
 
   defp candidate_move(board, color, piece_key, :home, die) do
-    if die == 6 and not blocked_by_own_piece?(board, color, piece_key, 0) do
+    if die in [1, 6] and not occupied_by_own_piece?(board, color, piece_key, 0) do
       %{piece: piece_key, new_pos: 0, action: :release}
     else
       nil
@@ -150,7 +153,10 @@ defmodule GameHub.Games.CoCaNgua.Board do
       new_pos > @finish ->
         nil
 
-      blocked_by_own_piece?(board, color, piece_key, new_pos) ->
+      path_blocked_by_own_piece?(board, color, piece_key, pos, new_pos) ->
+        nil
+
+      path_blocked_by_enemy_piece?(board, color, pos, die) ->
         nil
 
       new_pos == @finish ->
@@ -161,11 +167,50 @@ defmodule GameHub.Games.CoCaNgua.Board do
     end
   end
 
-  defp blocked_by_own_piece?(_board, _color, _piece_key, @finish), do: false
+  defp occupied_by_own_piece?(_board, _color, _piece_key, @finish), do: false
 
-  defp blocked_by_own_piece?(board, color, {_, idx}, new_pos) do
+  defp occupied_by_own_piece?(board, color, {_, idx}, pos) do
     Enum.any?(0..(@pieces_per_player - 1), fn other_idx ->
-      other_idx != idx and Map.get(board.pieces, {color, other_idx}) == new_pos
+      other_idx != idx and Map.get(board.pieces, {color, other_idx}) == pos
+    end)
+  end
+
+  # A horse may not land on, nor hop over, another of your own horses that's
+  # still travelling (only the shared finish cell allows several of your own
+  # horses to stack together).
+  defp path_blocked_by_own_piece?(board, color, {_, idx}, from, to) do
+    Enum.any?(0..(@pieces_per_player - 1), fn other_idx ->
+      if other_idx == idx do
+        false
+      else
+        case Map.get(board.pieces, {color, other_idx}) do
+          other_pos when is_integer(other_pos) ->
+            (other_pos == to and to != @finish) or (other_pos > from and other_pos < to)
+
+          _ ->
+            false
+        end
+      end
+    end)
+  end
+
+  # An enemy horse ahead of us on the shared main loop can't be hopped clean
+  # over — it can only be landed on exactly (a normal capture) or left short
+  # of. Doesn't apply once we've already turned off the loop onto our own
+  # private home stretch (no other color's horse can be there).
+  defp path_blocked_by_enemy_piece?(_board, _color, from, _die) when from > @track_length - 1, do: false
+
+  defp path_blocked_by_enemy_piece?(board, color, from, die) do
+    own_start = Map.fetch!(@starts, color)
+
+    Enum.any?(board.pieces, fn
+      {{other_color, _idx}, other_pos}
+      when other_color != color and is_integer(other_pos) and other_pos <= @track_length - 1 ->
+        other_rel = rem(absolute_cell(other_color, other_pos) - own_start + @track_length, @track_length)
+        other_rel > from and die > other_rel - from
+
+      _ ->
+        false
     end)
   end
 

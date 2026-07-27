@@ -227,11 +227,22 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
                 </span>
               </div>
 
+              <!-- Center hub is a plus-shape (5 cells), not a solid 3x3 — the 4
+                   diagonal corners belong to the main track (they bridge each
+                   arm's horizontal segment to its vertical one) and are
+                   rendered below as track cells, not covered by the hub. -->
               <div
-                style="grid-row: 7 / span 3; grid-column: 7 / span 3; background: var(--cream);"
-                class="m-0.5 flex items-center justify-center rounded-2xl"
+                style="grid-row: 7 / span 3; grid-column: 8 / span 1; background: var(--cream);"
+                class="m-0.5 rounded-2xl"
               >
-                <img src={trophy_src()} alt="" class="h-3/5 w-3/5 object-contain opacity-70" />
+              </div>
+              <div
+                style="grid-row: 8; grid-column: 7 / span 3; background: var(--cream);"
+                class="m-0.5 rounded-2xl"
+              >
+              </div>
+              <div style="grid-row: 8; grid-column: 8;" class="z-10 flex items-center justify-center">
+                <img src={trophy_src()} alt="" class="h-full w-full scale-150 object-contain opacity-70" />
               </div>
 
               <div
@@ -240,6 +251,18 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
                 class="flex items-center justify-center border border-zinc-200"
               >
                 <span class={["rounded-full", track_circle_class(idx)]}></span>
+              </div>
+
+              <!-- Decorative bridge cells at the 4 arm corners (not part of the
+                   52-position enumeration — no piece ever logically lands
+                   here), styled like a track cell so the loop looks
+                   unbroken. These are also where finished horses cluster. -->
+              <div
+                :for={color <- Layout.colors()}
+                style={style_at(Layout.finish_area_coord(color))}
+                class="flex items-center justify-center border border-zinc-200"
+              >
+                <span class={["h-3/5 w-3/5 rounded-full bg-white ring-2 ring-inset", arm_ring_color(color)]}></span>
               </div>
 
               <div

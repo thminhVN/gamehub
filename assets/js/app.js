@@ -46,6 +46,15 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+// Register the shell-caching service worker so the installed PWA opens
+// instantly. This only speeds up loading the static shell — actual
+// gameplay still needs a live connection to the LiveView socket above.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {})
+  })
+}
+
 // The lines below enable quality of life phoenix_live_reload
 // development features:
 //

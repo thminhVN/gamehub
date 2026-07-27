@@ -13,14 +13,14 @@ defmodule GameHubWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, page_title: "GameHub", games: @games)}
+    {:ok, assign(socket, page_title: "Bé vui học", games: @games)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-3xl px-4 py-16">
-      <h1 class="text-4xl font-bold tracking-tight" style="color: var(--toy-ink);">🎲 GameHub</h1>
+      <h1 class="text-4xl font-bold tracking-tight" style="color: var(--toy-ink);">🎲 Bé vui học</h1>
       <p class="mt-2 text-base" style="color: var(--toy-ink-soft);">Các trò chơi cờ bàn chơi trên 1 thiết bị.</p>
 
       <div class="mt-8 grid gap-4 sm:grid-cols-2">

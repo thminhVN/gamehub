@@ -18,13 +18,20 @@ defmodule GameHub.Games.CoCaNgua.BoardTest do
   end
 
   describe "leaving chuồng" do
-    test "cannot leave chuồng without a 6" do
+    test "cannot leave chuồng without a 1 or a 6" do
       board = %{Board.new(2) | die: 4, status: :moving}
       assert Board.legal_moves(board) == []
     end
 
     test "a 6 allows any piece in chuồng to leave" do
       board = %{Board.new(2) | die: 6, status: :moving}
+      moves = Board.legal_moves(board)
+      assert length(moves) == 4
+      assert Enum.all?(moves, &(&1.action == :release and &1.new_pos == 0))
+    end
+
+    test "a 1 also allows any piece in chuồng to leave" do
+      board = %{Board.new(2) | die: 1, status: :moving}
       moves = Board.legal_moves(board)
       assert length(moves) == 4
       assert Enum.all?(moves, &(&1.action == :release and &1.new_pos == 0))
@@ -76,6 +83,41 @@ defmodule GameHub.Games.CoCaNgua.BoardTest do
       board = put_in(board.pieces[{:red, 0}], 10)
       board = put_in(board.pieces[{:red, 1}], 7)
       refute Enum.any?(Board.legal_moves(board), &(&1.piece == {:red, 1} and &1.new_pos == 10))
+    end
+
+    test "own pieces cannot hop clean over each other either" do
+      board = %{Board.new(2) | die: 5, status: :moving}
+      board = put_in(board.pieces[{:red, 0}], 7)
+      board = put_in(board.pieces[{:red, 1}], 9)
+      refute Enum.any?(Board.legal_moves(board), &(&1.piece == {:red, 0}))
+    end
+
+    test "cannot hop clean over an enemy piece ahead on the shared loop" do
+      board = %{Board.new(2) | die: 5, status: :moving}
+      board = put_in(board.pieces[{:red, 0}], 12)
+      # yellow starts at absolute 26; relative pos 41 puts it at absolute cell
+      # (26+41) mod 52 = 15, i.e. 3 cells ahead of red's position 12 — closer
+      # than the die of 5, so red would hop clean over it.
+      board = put_in(board.pieces[{:yellow, 0}], 41)
+      refute Enum.any?(Board.legal_moves(board), &(&1.piece == {:red, 0}))
+    end
+
+    test "landing exactly on an enemy piece ahead is still a legal capture" do
+      board = %{Board.new(2) | die: 3, status: :moving}
+      board = put_in(board.pieces[{:red, 0}], 15)
+      # yellow relative pos 44 -> absolute cell (26+44) mod 52 = 18, exactly 3
+      # cells ahead of red's position 15 (and not a safe cell).
+      board = put_in(board.pieces[{:yellow, 0}], 44)
+      {:ok, board} = Board.apply_move(board, {:red, 0})
+      assert board.pieces[{:red, 0}] == 18
+      assert board.pieces[{:yellow, 0}] == :home
+    end
+
+    test "a die not reaching the enemy piece is unaffected by it" do
+      board = %{Board.new(2) | die: 2, status: :moving}
+      board = put_in(board.pieces[{:red, 0}], 12)
+      board = put_in(board.pieces[{:yellow, 0}], 41)
+      assert Enum.any?(Board.legal_moves(board), &(&1.piece == {:red, 0} and &1.new_pos == 14))
     end
   end
 

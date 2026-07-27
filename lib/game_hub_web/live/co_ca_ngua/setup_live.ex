@@ -44,7 +44,7 @@ defmodule GameHubWeb.CoCaNgua.SetupLive do
     ~H"""
     <div class="mx-auto max-w-xl px-4 py-16">
       <.link navigate={~p"/"} class="text-sm font-semibold hover:underline" style="color: var(--toy-ink-soft);">
-        &larr; GameHub
+        &larr; Bé vui học
       </.link>
 
       <h1 class="mt-2 text-4xl font-bold tracking-tight" style="color: var(--toy-ink);">🐴 Cờ cá ngựa</h1>
