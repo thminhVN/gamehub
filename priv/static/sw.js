@@ -2,13 +2,24 @@
 // opens instantly. Deliberately does NOT touch page navigations or /live —
 // gameplay runs over a live LiveView socket and needs a real connection;
 // this service worker only makes the shell load fast, not offline-playable.
-const CACHE_NAME = "be-vui-hoc-shell-v1";
+const CACHE_NAME = "be-vui-hoc-shell-v2";
 
 const PRECACHE_URLS = [
   "/manifest.json",
   "/favicon.ico",
   "/assets/css/app.css",
   "/assets/js/app.js",
+  "/images/assets/horse_red.webp",
+  "/images/assets/horse_green.webp",
+  "/images/assets/horse_yellow.webp",
+  "/images/assets/horse_blue.webp",
+  "/images/assets/die_1.webp",
+  "/images/assets/die_2.webp",
+  "/images/assets/die_3.webp",
+  "/images/assets/die_4.webp",
+  "/images/assets/die_5.webp",
+  "/images/assets/die_6.webp",
+  "/images/assets/trophy_gold.webp",
 ];
 
 self.addEventListener("install", (event) => {
@@ -44,17 +55,22 @@ self.addEventListener("fetch", (event) => {
 
   if (!isStaticAsset) return;
 
+  // Stale-while-revalidate: serve the cached copy immediately if there is
+  // one (fast repeat loads), but always refetch in the background and
+  // update the cache — so an asset that changed on a new deploy is never
+  // stuck serving the old copy forever, just for one extra load at worst.
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.match(request).then((cached) => {
+        const network = fetch(request)
+          .then((response) => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+          })
+          .catch(() => cached);
 
-      return fetch(request).then((response) => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      });
-    }),
+        return cached || network;
+      }),
+    ),
   );
 });

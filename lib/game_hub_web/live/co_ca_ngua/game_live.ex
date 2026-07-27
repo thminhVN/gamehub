@@ -534,9 +534,9 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
   defp safe_circle_color(:yellow), do: "bg-yellow-300 ring-yellow-500"
   defp safe_circle_color(:blue), do: "bg-blue-300 ring-blue-500"
 
-  defp horse_src(color), do: "/images/assets/horse_#{color}.png"
-  defp die_src(value), do: "/images/assets/die_#{value}.png"
-  defp trophy_src, do: "/images/assets/trophy_gold.png"
+  defp horse_src(color), do: "/images/assets/horse_#{color}.webp"
+  defp die_src(value), do: "/images/assets/die_#{value}.webp"
+  defp trophy_src, do: "/images/assets/trophy_gold.webp"
 
   defp piece_backing(:red), do: "bg-red-100 ring-2 ring-red-400"
   defp piece_backing(:green), do: "bg-emerald-100 ring-2 ring-emerald-400"
