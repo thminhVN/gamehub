@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 #
-# Deploy GameHub to a VPS with OTP hot-code upgrades (Castle/Forecastle).
+# Deploy GameHub to a VPS.
 #
-#   - First deploy (or `--full`): build a release tar on the VPS, extract it to
-#     the release root, (re)start the systemd service.
-#   - Subsequent deploys: build the new versioned tar, generate a relup against
-#     the running version, install it into the LIVE node — no restart, no
-#     dropped LiveView sockets (in-progress games keep playing).
+#   - Default: build a release tar on the VPS, extract it to the release root,
+#     restart the systemd service. Brief downtime, in-progress games drop.
+#   - `--hot`: OTP hot-code upgrade (Castle/Forecastle) instead — generate a
+#     relup against the running version and install it into the LIVE node, so
+#     LiveView sockets survive. **Only safe for pure Elixir/rules changes.**
 #   - If the old release .rel file is missing (e.g. after a manual rollback or
 #     first run after switching to Castle), falls back to a full deploy.
+#
+# WHY FULL IS THE DEFAULT: `Phoenix.Endpoint` reads `cache_static_manifest`
+# once, at boot. A relup that only does `{:load_module, Mod}` never re-inits the
+# endpoint, so `~p"/assets/app.css"` keeps rendering the digest recorded in the
+# manifest that was loaded at the last *restart* — and those digested files go
+# out as `cache-control: immutable, max-age=31536000`. A hot upgrade therefore
+# ships new Elixir code while every browser keeps the pre-deploy CSS/JS for a
+# year. Anything touching assets/, priv/static/ or templates needs the restart.
 #
 # Version is read from mix.exs; bump it (and update appup.ex) before deploying.
 # The easiest way is `make hooks` once — the pre-commit hook auto-bumps on main.
@@ -23,7 +31,7 @@
 #   SERVICE  (default game_hub)
 #   RESTART  (default "sudo systemctl")
 #
-# Usage: ./deploy.sh [--full]
+# Usage: ./deploy.sh [--hot]   (--full is still accepted; it is now the default)
 #
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -36,8 +44,10 @@ APP_NAME="game_hub"
 BUILD_DIR="$PWD"
 APP_DIR="$BASE/app"
 
-FORCE_FULL=0
-[[ "${1:-}" == "--full" ]] && FORCE_FULL=1
+# Full restart is the default; hot upgrades are opt-in because they cannot
+# refresh static assets (see the header comment).
+WANT_HOT=0
+[[ "${1:-}" == "--hot" ]] && WANT_HOT=1
 
 green() { printf '\033[0;32m%s\033[0m\n' "$1"; }
 red()   { printf '\033[0;31m%s\033[0m\n' "$1" >&2; }
@@ -71,11 +81,11 @@ CUR_VSN="$(test -x "$APP_DIR/bin/game_hub" && \
   || true)"
 CUR_VSN="$(echo "$CUR_VSN" | tr -d '[:space:]')"
 
-# Decide deploy mode. Fall back to full when old .rel is missing so a hot
-# upgrade is never attempted against a release that isn't properly installed.
-DEPLOY_MODE="hot"
-if [[ "$FORCE_FULL" == "1" || -z "$CUR_VSN" || "$CUR_VSN" == "$VSN" ]]; then
-  DEPLOY_MODE="full"
+# Decide deploy mode. Full unless --hot was asked for, and even then fall back
+# to full when there is nothing to upgrade *from* (not running, or same version).
+DEPLOY_MODE="full"
+if [[ "$WANT_HOT" == "1" && -n "$CUR_VSN" && "$CUR_VSN" != "$VSN" ]]; then
+  DEPLOY_MODE="hot"
 fi
 if [[ "$DEPLOY_MODE" == "hot" ]]; then
   OLD_REL="$APP_DIR/releases/${CUR_VSN}/${APP_NAME}.rel"
@@ -130,6 +140,25 @@ else
   green "Hot upgrade to v$VSN complete (no downtime)."
 fi
 
+# Verify the running node actually serves the CSS we just built. This catches the
+# silent failure mode described in the header: the endpoint keeps an old
+# cache_static_manifest, so the HTML links a stale digest that is then cached
+# `immutable` for a year. Non-fatal — the deploy is already live — but loud.
+step "Verifying served assets"
+EXPECTED_CSS="$(grep -o '"assets/css/app\.css":"[^"]*"' "$BUILD_DIR/priv/static/cache_manifest.json" 2>/dev/null \
+  | head -1 | sed -E 's/.*:"(.*)"/\1/')"
+SERVED_CSS="$(curl -fsS --max-time 10 "http://127.0.0.1:${PORT:-4050}/" 2>/dev/null \
+  | grep -oE 'assets/css/app-[a-f0-9]+\.css' | head -1)"
+
+if [[ -z "$EXPECTED_CSS" || -z "$SERVED_CSS" ]]; then
+  red "Could not verify served CSS (built='$EXPECTED_CSS' served='$SERVED_CSS') — check by hand."
+elif [[ "$SERVED_CSS" == "$EXPECTED_CSS" ]]; then
+  green "Serving the freshly built CSS ($SERVED_CSS)."
+else
+  red "STALE ASSETS: serving $SERVED_CSS but this build produced $EXPECTED_CSS."
+  red "The endpoint is still on an old cache_static_manifest. Run: ./deploy.sh"
+fi
+
 green "
 App:  https://${PHX_HOST:-games.gatetroy.com}
 Logs: journalctl -u $SERVICE -f
@@ -152,6 +181,7 @@ Logs: journalctl -u $SERVICE -f
 # Thereafter: commit your changes on main (hook bumps version) then ./deploy.sh
 #
 # No database, no email — game state lives only in each LiveView connection,
-# so there's nothing to migrate. Hot upgrades exist purely to avoid dropping
-# players mid-game when you ship a UI/rules tweak.
+# so there's nothing to migrate. Hot upgrades (`--hot`) exist purely to avoid
+# dropping players mid-game, and only work for pure Elixir changes — they cannot
+# refresh static assets, so they are opt-in rather than the default.
 # ------------------------------------------------------------------------------

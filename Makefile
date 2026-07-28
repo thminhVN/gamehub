@@ -1,4 +1,4 @@
-.PHONY: dev setup deps server test deploy deploy-full hooks push
+.PHONY: dev setup deps server test deploy deploy-hot hooks push
 
 # Start the Phoenix dev server (installs deps + sets up assets on first run)
 dev: deps
@@ -31,13 +31,15 @@ test:
 	mix test
 
 # VPS deploy: update the working tree to latest main, then run the deploy script
+# (full release extract + restart — the only mode that refreshes static assets)
 deploy:
 	git checkout main
 	git pull --ff-only origin main
 	./deploy.sh
 
-# VPS full deploy: update latest main, then force a full release extract/restart
-deploy-full:
+# VPS hot upgrade: no restart, live games keep their socket. Elixir-only changes
+# ONLY — a hot upgrade cannot refresh assets/ or priv/static (see deploy.sh).
+deploy-hot:
 	git checkout main
 	git pull --ff-only origin main
-	./deploy.sh --full
+	./deploy.sh --hot

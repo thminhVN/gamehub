@@ -16,7 +16,8 @@ mix test                  # full suite
 mix test test/game_hub/games/co_ca_ngua/board_test.exs:42   # single test by line
 mix assets.build          # tailwind + esbuild (no npm — both are Mix-managed binaries, no node_modules)
 make hooks                # one-time: installs the version-bump pre-commit hook
-make deploy               # VPS hot-code upgrade; make deploy-full forces a restart
+make deploy               # VPS deploy: full release extract + restart (use this)
+make deploy-hot           # OTP hot upgrade, no restart — Elixir-only changes, see below
 ```
 
 Dev port **4050** (`config/dev.exs`); prod reads `PORT` (default 4050) and `PHX_HOST`.
@@ -54,7 +55,9 @@ Images are WebP under `priv/static/images/{assets,ui,landing}/`. `priv/static/sw
 
 ## Releases and hot upgrades
 
-Deploys are OTP hot-code upgrades (Castle/Forecastle), so a running game keeps its LiveView socket across a deploy:
+**Deploy with `make deploy` (full extract + restart).** A hot upgrade (`make deploy-hot`) keeps live LiveView sockets, but **cannot ship asset changes**: `Phoenix.Endpoint` reads `cache_static_manifest` once at boot, and a relup that only does `:load_module` never re-inits the endpoint — so the HTML keeps linking the digest from the last *restart*, and digested assets go out `immutable, max-age=31536000`. Reach for `--hot` only when the diff is pure Elixir and dropping a game mid-play would actually hurt.
+
+The hot-upgrade machinery is still wired up and must stay consistent:
 
 - The `.githooks/pre-commit` hook auto-bumps the patch version in `mix.exs` **and** rewrites the versions in `appup.ex` on every commit to `main`. Versions in the two files must always match.
 - `appup.ex` describes how to get from the previous version to this one. `GameLive` holds game state, but `:load_module` is sufficient for plain UI/rules tweaks; only use `{:update, Mod, {:advanced, []}}` when a release changes the *shape* of `socket.assigns` and needs `code_change/3` to migrate live sessions.

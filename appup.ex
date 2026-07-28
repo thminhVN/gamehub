@@ -30,9 +30,9 @@
 #    [{'0.1.0', [{:load_module, GameHubWeb.CoCaNgua.GameLive}]}],
 #    [{'0.1.0', [{:load_module, GameHubWeb.CoCaNgua.GameLive}]}]}
 
-{~c"0.1.1",
+{~c"0.1.2",
  [
-   {~c"0.1.0",
+   {~c"0.1.1",
     [
       {:load_module, GameHubWeb.Layouts},
       {:load_module, GameHubWeb.CoCaNgua.SetupLive},
@@ -40,7 +40,7 @@
     ]}
  ],
  [
-   {~c"0.1.0",
+   {~c"0.1.1",
     [
       {:load_module, GameHubWeb.Layouts},
       {:load_module, GameHubWeb.CoCaNgua.SetupLive},

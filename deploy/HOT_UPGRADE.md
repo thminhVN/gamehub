@@ -5,7 +5,11 @@ to ship OTP **relups** — new code is loaded into the *running* BEAM node, so
 deploys drop no connections and don't restart the LiveView sockets. GameHub has
 no database, but it does have something worth protecting across a deploy:
 players mid-game in a pass-and-play LiveView session. A hot upgrade lets you
-ship a UI or rules tweak without kicking anyone out of their board.
+ship a rules tweak without kicking anyone out of their board.
+
+> **This is the opt-in path (`make deploy-hot` / `./deploy.sh --hot`), not the
+> default.** A relup cannot ship changed CSS, JS or images — see the assets
+> caveat below. `make deploy` (full extract + restart) is the normal deploy.
 
 ## Per-release checklist
 
@@ -52,19 +56,27 @@ any board mid-game keeps its state and its LiveView socket.
   add/adjust functions — but if you change what fields `socket.assigns` holds
   in a way old and new code disagree on, add an explicit `{:update, Mod,
   {:advanced, []}}` instruction and a `code_change/3` to migrate it, or ship
-  that release as `--full` instead.
+  that release as a full deploy instead.
 - **Dependency version bumps** make relups harder: `systools` needs an appup for
   every changed application. If a dep upgrade breaks relup generation, ship that
-  release with `./deploy.sh --full` (extract + restart) instead.
-- **New static assets (images, CSS) are picked up fine** by a relup since
-  `priv/static` ships with the release tar — no code reload needed for those.
+  release with `./deploy.sh` (extract + restart) instead.
+- **A relup CANNOT ship changed assets — this is why full is the default.**
+  The new `priv/static` does ride along in the release tar, but the endpoint
+  never re-reads it: `Phoenix.Endpoint` loads `cache_static_manifest` once, at
+  boot, so `~p"/assets/css/app.css"` keeps rendering the digest recorded at the
+  last *restart*. The stale digested file is still on disk and still served —
+  with `cache-control: immutable, max-age=31536000`. Net effect: new Elixir
+  code, year-old CSS in every browser, and no error anywhere to notice it by.
+  Symptom to recognise: the raw `/assets/css/app.css` has your change but the
+  `app-<hash>.css?vsn=d` that the HTML links does not. Any diff touching
+  `assets/` or `priv/static/` needs `make deploy`.
 - **It doesn't survive a wiped release root.** `commit` makes the version
   permanent (survives reboot/crash), but the upgrade history lives in
   `/opt/game_hub/app/releases/`. Keep it.
 
 ## Escape hatch
 
-Anything goes wrong with a relup? `./deploy.sh --full` does a clean
+Anything goes wrong with a relup? `./deploy.sh` (the default, full) does a clean
 extract-and-restart of the current version — a brief blip (any live game gets
 dropped), but always works. Roll back a bad commit with
 `bin/game_hub install <old> && bin/game_hub commit <old>`.
