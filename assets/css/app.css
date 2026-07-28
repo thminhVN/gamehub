@@ -99,6 +99,13 @@
 /* Use the data attribute for dark mode  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* Short viewports — a phone held in landscape is ~320–430px tall but ~700–930px
+   wide, so Tailwind's width breakpoints (`sm:` and up) all fire and hand a phone
+   the tablet-sized chrome, which then does not fit vertically. The setup and game
+   screens must fit one screen with no scrolling, so they size against height with
+   `short:` instead. Tablets in landscape are 744px+ tall and stay unaffected. */
+@custom-variant short (@media (max-height: 560px));
+
 /* =========================================================================
    Design tokens — "Toy Box" brief, see docs/design/co_ca_ngua_toybox_brief.md
 

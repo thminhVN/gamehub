@@ -2,7 +2,7 @@
 // opens instantly. Deliberately does NOT touch page navigations or /live —
 // gameplay runs over a live LiveView socket and needs a real connection;
 // this service worker only makes the shell load fast, not offline-playable.
-const CACHE_NAME = "be-vui-hoc-shell-v5";
+const CACHE_NAME = "be-vui-hoc-shell-v6";
 
 const PRECACHE_URLS = [
   "/manifest.json",

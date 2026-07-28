@@ -149,10 +149,7 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class="toybox-screen relative mx-auto flex max-w-[1900px] items-stretch gap-2 overflow-hidden px-2 py-2 sm:gap-4 sm:px-4"
-      style="height: 100dvh;"
-    >
+    <div class="toybox-screen relative mx-auto flex h-[100dvh] max-w-[1900px] items-stretch gap-4 overflow-hidden px-4 py-2 short:gap-2 short:px-2 short:py-1">
       <div
         :if={@board.die}
         id={"dice-popup-#{@roll_seq}"}
@@ -161,26 +158,26 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
         <img
           src={die_src(@board.die)}
           alt={"Xúc xắc #{@board.die}"}
-          class="h-40 w-40 animate-dice-center-pop drop-shadow-2xl sm:h-56 sm:w-56"
+          class="h-56 w-56 animate-dice-center-pop drop-shadow-2xl short:h-32 short:w-32"
         />
       </div>
 
-      <div class="relative flex w-32 shrink-0 flex-col gap-2 py-2 sm:w-40 sm:gap-3 lg:w-48">
+      <div class="relative flex w-40 shrink-0 flex-col gap-3 py-2 lg:w-48 short:w-32 short:gap-1.5 short:py-0">
         <div class="flex items-center justify-between">
           <button
             type="button"
             phx-click="toggle_settings"
-            class="toy-icon-btn !h-10 !w-10 sm:!h-12 sm:!w-12"
+            class="toy-icon-btn !h-12 !w-12 short:!h-9 short:!w-9"
             aria-label="Cài đặt"
           >
-            <.toy_icon name="settings" class="h-5 w-5 sm:h-6 sm:w-6" />
+            <.toy_icon name="settings" class="h-6 w-6 short:h-5 short:w-5" />
           </button>
-          <.toy_icon name="horse" class="h-6 w-6 sm:h-7 sm:w-7" />
+          <.toy_icon name="horse" class="h-7 w-7 short:h-6 short:w-6" />
         </div>
 
         <div
           :if={@show_settings}
-          class="absolute left-0 top-14 z-40 w-56 rounded-2xl border-2 p-2 shadow-xl sm:top-16 bg-white border-cream-deep"
+          class="absolute left-0 top-16 z-40 w-56 rounded-2xl border-2 p-2 shadow-xl short:top-11 bg-white border-cream-deep"
         >
           <.link
             navigate={~p"/games/co-ca-ngua"}
@@ -196,7 +193,7 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
           </.link>
         </div>
 
-        <div class="flex flex-1 flex-col justify-center gap-2 sm:gap-3">
+        <div class="flex min-h-0 flex-1 flex-col justify-center gap-3 short:gap-1.5">
           <.player_panel
             :for={{player, i} <- left_players(@board)}
             player={player}
@@ -224,7 +221,7 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
               >
                 <span
                   :if={!@board.winner && color == current_player_color(@board)}
-                  class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow sm:text-xs"
+                  class="rounded-full bg-white px-2 py-0.5 text-xs font-bold uppercase tracking-wide shadow short:px-1 short:text-[9px]"
                   style={"color: #{yard_ink(color)};"}
                 >
                   ▶ Đang chơi
@@ -266,7 +263,9 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
                 style={style_at(Layout.home_stretch_bg_coord(color, i))}
                 class={["flex items-center justify-center border border-black/10", color_bg(color)]}
               >
-                <span class="text-xs font-bold text-white drop-shadow sm:text-sm">{i + 1}</span>
+                <span class="text-sm font-bold text-white drop-shadow short:text-[10px]">
+                  {i + 1}
+                </span>
               </div>
 
               <button
@@ -298,7 +297,7 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
                 style={style_at(coord)}
                 class="z-20 flex items-center justify-center"
               >
-                <span class="flex h-3/5 w-3/5 animate-piece-pop items-center justify-center rounded-full text-[10px] font-bold text-white shadow-lg ring-2 ring-white sm:text-xs bg-toy-blue-dark">
+                <span class="flex h-3/5 w-3/5 animate-piece-pop items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ring-2 ring-white short:text-[10px] bg-toy-blue-dark">
                   {step}
                 </span>
               </div>
@@ -315,34 +314,38 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
             <img
               src={trophy_src()}
               alt=""
-              class="h-24 w-24 animate-trophy-pop object-contain drop-shadow-xl sm:h-32 sm:w-32"
+              class="h-32 w-32 animate-trophy-pop object-contain drop-shadow-xl short:h-20 short:w-20"
             />
             <p
-              class="flex items-center justify-center gap-2 text-2xl font-bold sm:text-3xl"
+              class="flex items-center justify-center gap-2 text-3xl font-bold short:text-xl"
               style={"color: #{yard_ink(@board.winner)};"}
             >
-              <.toy_icon name="party" class="h-8 w-8" /> {Board.color_name(@board.winner)} thắng rồi!
+              <.toy_icon name="party" class="h-8 w-8 short:h-6 short:w-6" />
+              {Board.color_name(@board.winner)} thắng rồi!
             </p>
-            <.link navigate={~p"/games/co-ca-ngua"} class="toy-btn toy-btn--red">
+            <.link
+              navigate={~p"/games/co-ca-ngua"}
+              class="toy-btn toy-btn--red short:!min-h-[40px] short:!py-1.5 short:!text-sm"
+            >
               Chơi lại
             </.link>
           </div>
         </div>
       </div>
 
-      <div class="flex w-32 shrink-0 flex-col gap-2 py-2 sm:w-40 sm:gap-3 lg:w-48">
+      <div class="flex w-40 shrink-0 flex-col gap-3 py-2 lg:w-48 short:w-32 short:gap-1.5 short:py-0">
         <div class="flex items-center justify-end gap-2">
-          <.fullscreen_button class="!h-10 !w-10 sm:!h-12 sm:!w-12" />
+          <.fullscreen_button class="!h-12 !w-12 short:!h-9 short:!w-9" />
           <.link
             navigate={~p"/games/co-ca-ngua"}
-            class="toy-icon-btn !h-10 !w-10 sm:!h-12 sm:!w-12"
+            class="toy-icon-btn !h-12 !w-12 short:!h-9 short:!w-9"
             aria-label="Thoát"
           >
-            <.toy_icon name="exit" class="h-5 w-5 sm:h-6 sm:w-6" />
+            <.toy_icon name="exit" class="h-6 w-6 short:h-5 short:w-5" />
           </.link>
         </div>
 
-        <div class="flex flex-1 flex-col justify-center gap-2 sm:gap-3">
+        <div class="flex min-h-0 flex-1 flex-col justify-center gap-3 short:gap-1.5">
           <.player_panel
             :for={{player, i} <- right_players(@board)}
             player={player}
@@ -351,10 +354,10 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
           />
         </div>
 
-        <div class="flex flex-col items-stretch gap-1.5">
+        <div class="flex shrink-0 flex-col items-stretch gap-1.5">
           <div
             :if={@pending_move}
-            class="rounded-2xl border-2 p-2 text-center bg-white border-toy-blue"
+            class="rounded-2xl border-2 p-2 text-center bg-white border-toy-blue short:p-1.5"
           >
             <p class="text-xs font-bold text-ink">
               Di chuyển {move_description(@pending_move)}?
@@ -366,14 +369,14 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
               <button
                 type="button"
                 phx-click="confirm_move"
-                class="toy-btn toy-btn--blue w-full !min-h-0 !py-1.5 !text-sm"
+                class="toy-btn toy-btn--blue w-full !min-h-0 !py-1.5 !text-sm short:!text-xs"
               >
                 Xác nhận
               </button>
               <button
                 type="button"
                 phx-click="cancel_move"
-                class="toy-btn toy-btn--neutral w-full !min-h-0 !py-1.5 !text-sm"
+                class="toy-btn toy-btn--neutral w-full !min-h-0 !py-1.5 !text-sm short:!text-xs"
               >
                 Hủy
               </button>
@@ -388,15 +391,15 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
                 JS.push("roll")
                 |> JS.transition({"ease-out duration-150", "scale-100", "scale-90"}, time: 150)
               }
-              class="toy-btn toy-btn--red w-full !min-h-[52px] !text-sm sm:!min-h-[60px] sm:!text-lg"
+              class="toy-btn toy-btn--red w-full !min-h-[60px] !text-lg short:!min-h-[44px] short:!py-1 short:!text-sm"
             >
-              <.toy_icon name="dice" class="h-6 w-6" /> Đổ xúc xắc
+              <.toy_icon name="dice" class="h-6 w-6 short:h-5 short:w-5" /> Đổ xúc xắc
             </button>
 
             <div
               :if={@board.status == :moving}
               id={"die-#{@roll_seq}"}
-              class="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border-2 p-1 animate-dice-pop sm:h-14 sm:w-14 sm:p-1.5 bg-white border-toy-blue"
+              class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 p-1.5 animate-dice-pop short:h-10 short:w-10 short:p-1 bg-white border-toy-blue"
             >
               <img
                 src={die_src(@board.die)}
@@ -409,9 +412,9 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
               type="button"
               phx-click="undo"
               disabled={@history == []}
-              class="toy-btn toy-btn--neutral w-full !min-h-[40px] !text-xs sm:!min-h-[44px] sm:!text-sm"
+              class="toy-btn toy-btn--neutral w-full !min-h-[44px] !text-sm short:!min-h-[36px] short:!py-1 short:!text-xs"
             >
-              <.toy_icon name="undo" class="h-5 w-5" /> Hoàn tác
+              <.toy_icon name="undo" class="h-5 w-5 short:h-4 short:w-4" /> Hoàn tác
             </button>
           </div>
         </div>
@@ -450,27 +453,27 @@ defmodule GameHubWeb.CoCaNgua.GameLive do
     ~H"""
     <div
       class={[
-        "player-panel flex items-center gap-2 rounded-2xl border-2 bg-white p-2 shadow-md sm:gap-3 sm:p-3",
+        "player-panel flex items-center gap-3 rounded-2xl border-2 bg-white p-3 shadow-md short:gap-2 short:p-1.5",
         if(@active, do: "player-panel--active", else: "player-panel--inactive")
       ]}
       style={"border-color: #{panel_border(@player.color)};"}
     >
       <div class={[
-        "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-14 sm:w-14",
+        "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full short:h-9 short:w-9",
         piece_backing(@player.color)
       ]}>
         <img
           src={horse_src(@player.color)}
           alt=""
-          class={["h-8 w-8 object-contain sm:h-11 sm:w-11", @active && "animate-avatar-bounce"]}
+          class={["h-11 w-11 object-contain short:h-7 short:w-7", @active && "animate-avatar-bounce"]}
         />
       </div>
       <div class="min-w-0 flex-1">
-        <p class="break-words text-xs font-bold leading-tight sm:text-sm text-ink">
+        <p class="break-words text-sm font-bold leading-tight short:text-[11px] text-ink">
           {@player.name}
         </p>
-        <p class="flex items-center gap-1 text-[10px] text-ink-soft sm:text-xs">
-          {@finished}/4 <.toy_icon name="trophy" class="h-3.5 w-3.5" />
+        <p class="flex items-center gap-1 text-xs text-ink-soft short:text-[10px]">
+          {@finished}/4 <.toy_icon name="trophy" class="h-3.5 w-3.5 short:h-3 short:w-3" />
         </p>
       </div>
     </div>
